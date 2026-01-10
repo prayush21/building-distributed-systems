@@ -1,4 +1,4 @@
-# Building a Memcache Clone
+# Building Memcache
 
 This project is a step-by-step implementation of a distributed key-value store inspired by Memcached, built in Go. The goal is to create a scalable, high-performance caching system from scratch.
 
