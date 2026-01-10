@@ -18,6 +18,5 @@ Steps (referencing main.go):
 - Set up TCP listener and handle connections (listener.Accept, handleConnection).
 - Parse incoming commands (strings.Fields, switch on command).
 - Implement thread-safe Get/Set using mutex on map (Store struct with sync.RWMutex).
-- Add validation, error handling, and responses (error messages for invalid commands).
 
 ### Next Phase: Sharding
