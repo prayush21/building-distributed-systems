@@ -19,7 +19,7 @@ Steps (referencing memcache/main.go):
 - Parse incoming commands (strings.Fields, switch on command).
 - Implement thread-safe Get/Set using mutex on map (Store struct with sync.RWMutex).
 
-### Milestone 2: Sharding and setting up a Distributed Cache Client (using Consistent Hashing)
+### Milestone 2: Sharding and setting up a Distributed Cache Client (using Consistent Hashing) ✅ (Completed)
 
 Steps (referencing main.go):
 
