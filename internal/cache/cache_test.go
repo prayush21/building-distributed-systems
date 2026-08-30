@@ -120,24 +120,40 @@ func TestCanAdmitFalseEvictsNothing(t *testing.T) {
 	}
 }
 
-// TestSizeChangeOnHit: real traces re-request an object id at a new size.
-func TestSizeChangeOnHit(t *testing.T) {
+// TestSizeChangeOnHitKeepsAdmittedSize pins the behavior that decides whether
+// this harness agrees with libCacheSim on real traces.
+//
+// Traces re-request the same object id at different sizes constantly. A
+// resident object keeps the size it was admitted with; libCacheSim's
+// cache_find_base updates only next_access_vtime and freq on a hit. Resizing in
+// place instead shifts the LRU miss ratio well outside tolerance.
+func TestSizeChangeOnHitKeepsAdmittedSize(t *testing.T) {
 	p := newFIFOStub()
 	c := New(100, p)
 	c.Access("a", 20)
 	c.Access("b", 20)
 
 	if hit := c.Access("a", 50); !hit {
-		t.Fatal("a should hit regardless of size change")
+		t.Fatal("a should hit regardless of the size change")
 	}
-	if c.Used() != 70 {
-		t.Errorf("used = %d, want 70 (50+20)", c.Used())
+	if c.Used() != 40 {
+		t.Errorf("used = %d, want 40: a keeps its admitted size of 20", c.Used())
 	}
 
-	// Growing past capacity must shrink back under it.
+	// The miss ratios still account for what was requested, not what is
+	// stored, so the larger re-request is counted at its own size.
+	s := c.Stats()
+	if s.BytesRequested != 90 {
+		t.Errorf("BytesRequested = %d, want 90 (20+20+50)", s.BytesRequested)
+	}
+	if s.BytesMissed != 40 {
+		t.Errorf("BytesMissed = %d, want 40", s.BytesMissed)
+	}
+
+	// A hit at a size that would not have fit must not evict anything.
 	c.Access("a", 95)
-	if c.Used() > 100 {
-		t.Errorf("used = %d exceeds capacity 100", c.Used())
+	if c.Used() != 40 || !c.Contains("b") {
+		t.Errorf("used = %d, b resident = %v; a hit must not trigger eviction", c.Used(), c.Contains("b"))
 	}
 }
 

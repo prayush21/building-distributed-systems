@@ -151,22 +151,23 @@ func (c *Cache) access(key string, size int) bool {
 	c.stats.Requests++
 	c.stats.BytesRequested += int64(size)
 
-	if e, ok := c.data[key]; ok {
+	if _, ok := c.data[key]; ok {
 		c.stats.Hits++
 		c.stats.BytesHit += int64(size)
 		c.pol.OnHit(key)
 
-		// Real traces re-request the same object id at a different size.
-		// Track the newest size so byte accounting stays honest, shrinking
-		// back under capacity if the object grew.
-		if e.size != size {
-			c.used += int64(size) - int64(e.size)
-			c.data[key] = entry{size: size}
-			if c.used > c.capacity {
-				c.evictToFit(0)
-			}
-		}
-
+		// A resident object keeps the size it was admitted with, even when
+		// the trace re-requests the same id at a different size. Occupancy
+		// therefore tracks what is stored, while the miss ratios above track
+		// what was asked for.
+		//
+		// This is not a detail. In the alibabaBlock traces 63% of objects
+		// appear at more than one size and 70% of requests touch such an
+		// object, so resizing in place instead moved the LRU request miss
+		// ratio by 0.015 against libCacheSim -- fifteen times the tolerance
+		// this harness is held to. libCacheSim's cache_find_base updates only
+		// next_access_vtime and freq on a hit, never obj_size, and the
+		// numbers agree once that is matched. See harness/VALIDATION.md.
 		c.sampleMeta()
 		return true
 	}
