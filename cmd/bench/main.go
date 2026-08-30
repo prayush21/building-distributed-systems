@@ -13,6 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/prayush21/building-distributed-systems/internal/bench"
@@ -111,6 +112,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	rep.Config.Command = invocation(os.Args)
 
 	if *jsonOut != "" {
 		b, err := json.MarshalIndent(rep, "", "  ")
@@ -144,6 +146,37 @@ func run() error {
 		return fmt.Errorf("%d configurations produced invalid results", len(invalid))
 	}
 	return nil
+}
+
+// invocation renders the command line for the report. The binary is reduced to
+// its base name and arguments are quoted only when a shell would need it, so
+// the recorded line is something a reader can actually paste rather than a path
+// into whatever directory the binary happened to be built in.
+func invocation(args []string) string {
+	if len(args) == 0 {
+		return ""
+	}
+	out := make([]string, 0, len(args))
+	out = append(out, shellQuote(filepath.Base(args[0])))
+	for _, a := range args[1:] {
+		out = append(out, shellQuote(a))
+	}
+	return strings.Join(out, " ")
+}
+
+func shellQuote(s string) string {
+	if s == "" {
+		return "''"
+	}
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		case r == '.', r == '_', r == '/', r == '-':
+		default:
+			return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+		}
+	}
+	return s
 }
 
 func usage() {

@@ -29,6 +29,13 @@ func Markdown(rep *Report) string {
 		"none"))
 	w("| Seed | %d |", rep.Config.Seed)
 	w("| Belady baseline | %s |", ternary(rep.Config.Oracle, "enabled", "**disabled**, gap-closed unavailable"))
+	if rep.Config.Command != "" {
+		w("")
+		w("Reproduce with:\n")
+		w("```")
+		w("%s", rep.Config.Command)
+		w("```")
+	}
 	w("")
 
 	w("## Traces\n")

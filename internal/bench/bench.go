@@ -202,6 +202,10 @@ type TraceInfo struct {
 
 // Config records the sweep that produced a report.
 type Config struct {
+	// Command is the invocation that produced this report, so a result file
+	// says how to reproduce itself.
+	Command string `json:"command,omitempty"`
+
 	Policies      []string `json:"policies"`
 	Sizes         []string `json:"sizes"`
 	IgnoreObjSize bool     `json:"ignore_obj_size"`
