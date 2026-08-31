@@ -1,41 +1,5 @@
 # Building Distributed Systems
 
-Two related projects in this repo, built in Go:
-
-1. **Memcache** — a step-by-step implementation of a distributed key-value
-   store inspired by Memcached.
-2. **Cache policy harness** — a trace-driven simulator for comparing cache
-   eviction policies (FIFO, LRU, LFU, S3-FIFO, SIEVE, Belady optimal),
-   validated against [libCacheSim](https://libcachesim.com/) on real traces.
-
-## Memcache
-
-### Project Checklist
-
-- [x] Milestone 1: Setting up Single-Node Key-Value Store
-- [x] Milestone 2: Sharding
-- [ ] Milestone 3: Replication
-- [ ] TODO
-
-### Milestone 1: Setting up Single-Node Key-Value Store ✅ (Completed)
-
-Steps (referencing memcache/main.go):
-
-- Set up TCP listener and handle connections (listener.Accept, handleConnection).
-- Parse incoming commands (strings.Fields, switch on command).
-- Implement thread-safe Get/Set using mutex on map (Store struct with sync.RWMutex).
-
-### Milestone 2: Sharding and setting up a Distributed Cache Client (using Consistent Hashing) ✅ (Completed)
-
-Steps (referencing main.go):
-
-- Set up Client interface over the net.Conn interface, with additional operations for GET and SET to the store at server.
-- Implement the Consistent Hashing. Setup Ring interface with AddNode & GetNode.
-- Bring together Client and Ring Interface to get a Distributed Cache Client.
-- Add validation & error handling (Let CC handle this).
-
-### Next Phase: Replication
-
 ## Cache policy harness
 
 `internal/policy` implements the eviction policies; `internal/replay` drives
